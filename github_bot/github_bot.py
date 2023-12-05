@@ -1,3 +1,4 @@
+import ast
 from argparse import ArgumentParser
 from github import Github
 import requests
@@ -24,16 +25,36 @@ def analyze_pr_diff(settings, pr_diff):
 
     try:
         response = openai.Completion.create(
-            model="text-davinci-003",  
-            prompt=f'Please analyze the following GitHub diff and provide comments: {pr_diff}',
+            model="gpt-3.5-turbo-instruct",  
+            prompt=f'''
+                Please analyze the following GitHub diff and provide structured comments for a code review. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents of any kind in the list of tuples or around it besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
+
+                {pr_diff}
+
+                Your response should strictly follow this format:
+                [("file1.txt", 10, "Comment about line 10", "@@ -8,12 +8,15 @@ refactoring"), ("file2.txt", 6, "Comment about line 6", "1bf4f2d", "@@ -4,10 +7,15 @@ refactoring")]
+                ''',
+                max_tokens=150
             )
 
-        print ("respp", response)
-        feedback = response.choices[0].text.strip() if response.choices else ""
-        return feedback
+        print ('respp', response)
+        feedback = response.choices[0].text.strip() if response.choices else ''
+
+        # format and parse the feedback
+        try:
+            if feedback.strip().startswith("("): #check if the response starts with a tuple
+                formatted_feedback = f'[{feedback.strip()}]' #convert a single tuple to the list of tuples
+            else:
+                formatted_feedback = feedback.strip()
+
+            comments_to_add = ast.literal_eval(formatted_feedback)
+            return comments_to_add
+        except (ValueError, SyntaxError) as error:
+            print(f'Error in formatting the response: {error}')
+            return []
 
     except openai.error.OpenAIError as error:
-        print(f"Error in OpenAI API call: {error}")
+        print(f'Error in OpenAI API call: {error}')
         return []
 
 def poll_prs(settings):
@@ -52,6 +73,8 @@ def poll_prs(settings):
         pr_diff = get_last_pr_diff(settings, pr)
 
         pr_comments = analyze_pr_diff(settings, pr_diff)
+
+        print(pr_comments)
 
 if __name__ == "__main__":
     project_description='''
