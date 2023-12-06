@@ -25,9 +25,9 @@ def analyze_pr_diff(settings, pr_diff):
 
     try:
         response = openai.Completion.create(
-            model="gpt-3.5-turbo-instruct",  
+            model="text-davinci-003",  
             prompt=f'''
-                Please analyze the following GitHub diff and provide structured comments for a code review. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents of any kind in the list of tuples or around it besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
+                Please analyze the following GitHub diff and provide structured comments for a code review. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
 
                 {pr_diff}
 
@@ -57,6 +57,13 @@ def analyze_pr_diff(settings, pr_diff):
         print(f'Error in OpenAI API call: {error}')
         return []
 
+def add_comments_on_pull_request(pr, repo, pr_comments):
+    # Fetch the commit object using its SHA
+    commit = repo.get_commit(pr.head.sha)
+
+    for file_path, position, comment, diff_hunk in pr_comments:
+        pr.create_review_comment(comment, commit, file_path, position)
+
 def poll_prs(settings):
     # set up
     github_client = Github(settings.github_token)
@@ -75,6 +82,8 @@ def poll_prs(settings):
         pr_comments = analyze_pr_diff(settings, pr_diff)
 
         print(pr_comments)
+
+        add_comments_on_pull_request(pr, repo, pr_comments)
 
 if __name__ == "__main__":
     project_description='''
