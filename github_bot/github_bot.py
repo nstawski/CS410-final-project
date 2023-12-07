@@ -27,7 +27,7 @@ def analyze_pr_diff(settings, pr_diff):
         response = openai.Completion.create(
             model="text-davinci-003",  
             prompt=f'''
-                Please analyze the following GitHub diff and provide structured comments for a code review. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
+                Please analyze the following GitHub diff and provide structured comments for a pull request review detailing what can be improved in the pr. If you can suggest the exact improvement (wording, spelling correction, style or a piece of script), please include the improvement in your comment. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
 
                 {pr_diff}
 
