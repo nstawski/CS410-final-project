@@ -4,6 +4,17 @@ from github import Github
 import requests
 import openai
 
+MODEL = "text-davinci-003"
+def generate_prompt(pr_diff):
+    return f'''
+            Please analyze the following GitHub diff and provide structured comments for a pull request review detailing what can be improved in the pr. If you can suggest the exact improvement (wording, spelling correction, style or a piece of script), please include the improvement in your comment. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
+
+            {pr_diff}
+
+            Your response should strictly follow this format:
+            [("file1.txt", 10, "Comment about line 10", "@@ -8,12 +8,15 @@ refactoring"), ("file2.txt", 6, "Comment about line 6", "1bf4f2d", "@@ -4,10 +7,15 @@ refactoring")]
+        '''
+
 def get_last_pr_diff(settings, pr):
     # couldn't fetch the pr diff with the Github package for some reqson, using requests instead
     print(pr)
@@ -25,17 +36,10 @@ def analyze_pr_diff(settings, pr_diff):
 
     try:
         response = openai.Completion.create(
-            model="text-davinci-003",  
-            prompt=f'''
-                Please analyze the following GitHub diff and provide structured comments for a pull request review detailing what can be improved in the pr. If you can suggest the exact improvement (wording, spelling correction, style or a piece of script), please include the improvement in your comment. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
-
-                {pr_diff}
-
-                Your response should strictly follow this format:
-                [("file1.txt", 10, "Comment about line 10", "@@ -8,12 +8,15 @@ refactoring"), ("file2.txt", 6, "Comment about line 6", "1bf4f2d", "@@ -4,10 +7,15 @@ refactoring")]
-                ''',
-                max_tokens=150
-            )
+            model=MODEL,  
+            prompt=generate_prompt(pr_diff),
+            max_tokens=150
+        )
 
         print ('respp', response)
         feedback = response.choices[0].text.strip() if response.choices else ''
