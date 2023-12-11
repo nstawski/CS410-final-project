@@ -7,12 +7,25 @@ import openai
 MODEL = "gpt-3.5-turbo-instruct"
 def generate_prompt(pr_diff):
     return f'''
-            Please assume a role of a well-versed and highly experienced software engineer. Please analyze the following GitHub diff and provide structured comments detailing what can be improved in the pr. If you can suggest the exact improvement (wording, spelling correction, style or a piece of script), please include the improvement and the relevant code in your comment. The code should be formatted with backticks so it shows in GitHub as a code snippet. If you are suggesting an improvement or askign for a change, include code to illustrate or explain your suggestion. The suggested code should be valid code in the same language as the reviewed file. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". There should be no "Response:", or "Answer:" or "\n" or anything like that besides the python list requested. Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. All brackets in your response should be correctly closed. Here's the diff:
+        As an experienced Python software engineer, please analyze the provided GitHub diff, which is written in Python. Your task is to provide structured comments detailing potential improvements in the pull request. For each comment:
 
-            {pr_diff}
+        1. Suggest a specific improvement. This could be related to wording, spelling corrections, coding style, or a script enhancement.
+        2. Include the improvement suggestion with relevant code, formatted in backticks for GitHub code snippet display.
+        3. If the suggestion is about a code change or an inquiry for modification, illustrate it with valid Python code that matches the style and context of the original code.
+        4. Format your response as a Python list of tuples. Each tuple should contain:
+        - File path as a string
+        - Line number as an integer
+        - Comment as a string (correctly formatted and escaped)
+        - Relevant diff hunk section as a string (accurately corresponding to the specific place the comment is related to)
 
-            Your response should strictly follow this format:
-            [("file1.txt", 10, "Comment about line 10", "@@ -8,12 +8,15 @@ refactoring"), ("file2.txt", 6, "Comment about line 6", "1bf4f2d", "@@ -4,10 +7,15 @@ refactoring")]
+        Ensure that your response starts with '[' and ends with ']', containing only the list of tuples. Each element in the tuple should be correctly formatted for Python, and all brackets in your response should be properly closed. The diff hunk section should specifically match the location of the suggested change.
+
+        Here is the diff:
+        {pr_diff}
+
+        Please provide your structured comments as a list in this format:
+        [("file_path.py", 10, "`suggested_code_change`", "@@ -8,12 +8,15 @@ diff hunk"), ...]
+
         '''
 
 def get_last_pr_diff(settings, pr):
@@ -51,8 +64,19 @@ def analyze_pr_diff(settings, pr_diff):
             else:
                 formatted_feedback = feedback.strip()
 
-            comments_to_add = ast.literal_eval(formatted_feedback)
-            return comments_to_add
+            # replace backslash-escaped quotes with regular quotes
+            cleaned_feedback = formatted_feedback.replace("\\\"", "\"")
+
+            print('cleaned feedba', cleaned_feedback)
+
+            try:
+                # Evaluate the cleaned string as a Python object
+                comments_to_add = ast.literal_eval(cleaned_feedback)
+                return comments_to_add
+            except Exception as e:
+                print(f"Error evaluating the string: {e}")
+                return None
+            
         except (ValueError, SyntaxError) as error:
             print(f'Error in formatting the response: {error}')
             return []
