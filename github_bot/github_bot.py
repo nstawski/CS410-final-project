@@ -4,10 +4,10 @@ from github import Github
 import requests
 import openai
 
-MODEL = "text-davinci-003"
+MODEL = "gpt-3.5-turbo-instruct"
 def generate_prompt(pr_diff):
     return f'''
-            Please analyze the following GitHub diff and provide structured comments for a pull request review detailing what can be improved in the pr. If you can suggest the exact improvement (wording, spelling correction, style or a piece of script), please include the improvement in your comment. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. Here's the diff:
+            Please assume a role of a well-versed and highly experienced software engineer. Please analyze the following GitHub diff and provide structured comments detailing what can be improved in the pr. If you can suggest the exact improvement (wording, spelling correction, style or a piece of script), please include the improvement and the relevant code in your comment. The code should be formatted with backticks so it shows in GitHub as a code snippet. If you are suggesting an improvement or askign for a change, include code to illustrate or explain your suggestion. The suggested code should be valid code in the same language as the reviewed file. Format your response as a Python list of tuples. There should be NO additional text or headers or newline characters or indents around the list besides the requested information and no text prefacing the start character of the list "[". There should be no "Response:", or "Answer:" or "\n" or anything like that besides the python list requested. Your response must start with "[" and end with "]" and contain only the list of tuples. Each tuple must contain the file path, line number, comment, and the relevant diff hunk section, all formatted correctly for Python. All brackets in your response should be correctly closed. Here's the diff:
 
             {pr_diff}
 
@@ -38,7 +38,7 @@ def analyze_pr_diff(settings, pr_diff):
         response = openai.Completion.create(
             model=MODEL,  
             prompt=generate_prompt(pr_diff),
-            max_tokens=150
+            max_tokens=2000
         )
 
         print ('respp', response)
