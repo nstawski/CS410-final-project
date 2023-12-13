@@ -4,28 +4,30 @@ from github import Github
 import requests
 import openai
 
-MODEL = "gpt-3.5-turbo-instruct"
+MODEL = "gpt-3.5-turbo"
 def generate_prompt(pr_diff):
     return f'''
-        As an experienced Python software engineer, please analyze the provided GitHub diff, which is written in Python. Your task is to provide structured comments detailing potential improvements in the pull request. For each comment:
+        As an experienced software engineer, your task is to analyze the provided GitHub diff and provide structured comments on potential improvements in the pull request. 
+        
+        For each comment:
 
-        1. Suggest a specific improvement. This could be related to wording, spelling corrections, coding style, or a script enhancement.
-        2. Include the improvement suggestion with relevant code, formatted in backticks for GitHub code snippet display.
-        3. If the suggestion is about a code change or an inquiry for modification, illustrate it with valid Python code that matches the style and context of the original code.
-        4. Format your response as a Python list of tuples. Each tuple should contain:
-        - File path as a string
-        - Line number as an integer
-        - Comment as a string (correctly formatted and escaped)
-        - Relevant diff hunk section as a string (accurately corresponding to the specific place the comment is related to)
+        1. Suggest a specific improvement, focusing on aspects such as wording, spelling corrections, coding style, or script enhancements. 
+        2. Critical: please include a relevant code snippet that demonstrates your suggestion. Format this code snippet in backticks (`) for proper display as a GitHub code snippet.
+        3. Ensure that the suggested code is valid Python code, matching the style and context of the original code in the diff. Make sure all comments are properly escaped.
+        4. Crucial: Format your response as a Python list of tuples. Each tuple should be enclosed in round brackets and contain:
+        - The file path as a string.
+        - The line number as an integer where the suggestion applies, correctly calculated for PyGithub using the diff hunk.
+        - A detailed comment as a string, including a specific code snippet within backticks.
+        - The corresponding diff hunk section as a string, accurately reflecting the location of the suggested change.
+        The order of elements in the tuple is VERY important, please do not alter it.
 
-        Ensure that your response starts with '[' and ends with ']', containing only the list of tuples. Each element in the tuple should be correctly formatted for Python, and all brackets in your response should be properly closed. The diff hunk section should specifically match the location of the suggested change.
+        Your response must start with '[' and end with ']', containing only the list of tuples. Each tuple element should be properly formatted for Python, with all brackets correctly closed. The diff hunk should match the location of your suggestion precisely.
 
-        Here is the diff:
+        Here is the diff for your review:
         {pr_diff}
 
-        Please provide your structured comments as a list in this format:
-        [("file_path.py", 10, "`suggested_code_change`", "@@ -8,12 +8,15 @@ diff hunk"), ...]
-
+        Format your response like this example:
+        [("file_path.py", 10, "Consider using list comprehension for efficiency: `[x for x in range(3)]`", "@@ -8,12 +8,15 @@ diff hunk"), ...]
         '''
 
 def get_last_pr_diff(settings, pr):
@@ -48,14 +50,18 @@ def analyze_pr_diff(settings, pr_diff):
     openai.api_key = settings.openai_api_key
 
     try:
-        response = openai.Completion.create(
+        response = openai.ChatCompletion.create(
             model=MODEL,  
-            prompt=generate_prompt(pr_diff),
-            max_tokens=2000
+            messages=[
+                {"role": "system", "content": "You are an experienced software engineer well versed in Python"},
+                {"role": "user", "content": generate_prompt(pr_diff)}
+            ]
+            # prompt=generate_prompt(pr_diff),
+            # max_tokens=2000
         )
 
         print ('respp', response)
-        feedback = response.choices[0].text.strip() if response.choices else ''
+        feedback = response.choices[0].message.content.strip() if response.choices else ''
 
         # format and parse the feedback
         try:
@@ -81,7 +87,7 @@ def analyze_pr_diff(settings, pr_diff):
             print(f'Error in formatting the response: {error}')
             return []
 
-    except openai.error.OpenAIError as error:
+    except openai.error.APIError as error:
         print(f'Error in OpenAI API call: {error}')
         return []
 
@@ -90,7 +96,14 @@ def add_comments_on_pull_request(pr, repo, pr_comments):
     commit = repo.get_commit(pr.head.sha)
 
     for file_path, position, comment, diff_hunk in pr_comments:
-        pr.create_review_comment(comment, commit, file_path, position)
+
+        pr.create_review_comment(
+            body=comment, 
+            commit_id=commit,  
+            path=file_path, 
+            position=position,  
+        )
+        # pr.create_review_comment(comment, commit, file_path, position)
 
 def poll_prs(settings):
     # set up
