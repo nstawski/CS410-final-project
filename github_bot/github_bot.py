@@ -128,7 +128,7 @@ def add_comments_on_pull_request(pr, repo, pr_comments):
         print("commit", commit)
         print("diff_hunk", diff_hunk)
 
-        pr.create_review_comment(
+        pr.create_comment(
             body=comment, 
             commit_id=commit,  
             path=file_path, 

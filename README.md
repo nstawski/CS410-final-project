@@ -23,14 +23,28 @@ pip install -r requirements.txt
 ```
 
 3. Set up GitHub Access token
-To be to use this application and connect to GitHub from your localhost, you need to setup a GitHub access token using this url: https://github.com/settings/personal-access-tokens/new
 
-and make sure you grant access to the PR actions (important!)
+To be able to use this application and connect to GitHub from your localhost, you need to setup a GitHub access token using this url: https://github.com/settings/personal-access-tokens/new
+
+and make sure you grant this token access to the PR actions (important!)
 
 4. Set up OpenAI API key
-Go to https://platform.openai.com/api-keys to setup the key
+
+To be able to query OpenAI API, you need to have an account with https://platform.openai.com - this is the same account as for accessing the ChatGPT itself, but the billing is different.
+
+By default, you get the $18 in credit for using the API, but you will be able to use gpt-4 endpoints only if you paid an additional $1 or more. I am using the `gpt-3.5-turbo` model that should be available for the free accounts, but you will definitely get better results if using `gpt-4`. There are other models that you can try: https://platform.openai.com/docs/models
+
+If you want to change the model, there is a variable in `github_bot.py` named `MODEL` which you need to change. It is located at the top of the file right after the imports.
+
+After you've logged in, go to https://platform.openai.com/api-keys to setup the API key and then provide it to this script as a parameter.
 
 5. Run the Script
+
+The script takes the following positional parameters:
+
+`GITHUB_ACCESS_TOKEN` - replace it with your GitHub access token
+`OPENAI_API_KEY` - replace it with your OpenAI API key
+`username/repository` - replace it with the specific repository that you want to use for the testing
 
 ```
 python github_bot.py GITHUB_ACCESS_TOKEN OPENAI_API_KEY username/repository
