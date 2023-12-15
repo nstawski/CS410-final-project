@@ -23,18 +23,18 @@ def generate_prompt(pr_diff):
         3. Ensure that the suggested code is valid Python code, matching the style and context of the original code in the diff. Make sure all comments are properly escaped.
         4. Crucial: Format your response as a Python list of tuples. Each tuple should be enclosed in round brackets and contain:
         - The file path as a string.
-        - The line number as an integer where the suggestion applies, correctly calculated for PyGithub using the diff hunk.
+        - The line number as an integer where the suggestion applies, correctly calculated for PyGithub using the diff hunk (should be the position in the diff).
         - A detailed comment as a string, including a specific code snippet within backticks.
         - The corresponding diff hunk section as a string, accurately reflecting the location of the suggested change.
         The order of elements in the tuple is VERY important, please do not alter it.
 
         Your response must start with '[' and end with ']', containing only the list of tuples. Each tuple element should be properly formatted for Python, with all brackets correctly closed. The diff hunk should match the location of your suggestion precisely.
 
-        Here is the diff for your review:
-        {pr_diff}
-
         Format your response like this example:
         [("file_path.py", 10, "Consider using list comprehension for efficiency: `[x for x in range(3)]`", "@@ -8,12 +8,15 @@"), ...]
+        
+        The rest after the semicolon will be the diff for your review:
+        {pr_diff}
         '''
 
 def get_last_pr_diff(settings, pr):
