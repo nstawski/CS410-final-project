@@ -43,8 +43,11 @@ After you've logged in, go to https://platform.openai.com/api-keys to setup the 
 The script takes the following positional parameters:
 
 `GITHUB_ACCESS_TOKEN` - replace it with your GitHub access token
+
 `OPENAI_API_KEY` - replace it with your OpenAI API key
+
 `username/repository` - replace it with the specific repository that you want to use for the testing
+
 
 For the illustrative purposes, I created the repo and a pull request: https://github.com/nstawski/github-pr-bot-test/pull/1 . Bear in mind that the user from which the response is created is the one that owns the github token, so I would not recommend using any public repository for this.
 
