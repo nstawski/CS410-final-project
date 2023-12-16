@@ -64,3 +64,5 @@ Run the script as follows:
 ```
 python github_bot.py GITHUB_ACCESS_TOKEN OPENAI_API_KEY username/repository
 ```
+
+The script will automatically retry if it encounters issues with OpenAI response and its subsequent parsing. In some cases, if there is an issue with posting the comments on GitHub, it might exit with an error and you may need to start again. In this case, please try again.
