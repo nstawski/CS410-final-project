@@ -12,7 +12,14 @@ This project is designed to be ran on localhost, but I might convert it to the w
 
 Steps to run:
 
-1. Create a virtual environment:
+1. Clone this repository:
+
+```
+git clone https://github.com/nstawski/CS410-final-project.git ns-410-final
+cd ns-410-final
+```
+
+2. Create a virtual environment:
 
 ```
 python -m venv github_pr_bot_venv
@@ -22,7 +29,7 @@ To activate:
 ```
 source github_pr_bot_venv/bin/activate
 ```
-2. Install Dependencies
+3. Install Dependencies
 
 Go into the `github_bot` folder 
 
@@ -36,13 +43,13 @@ Now run:
 pip install -r requirements.txt
 ```
 
-3. Set up GitHub Access token
+4. Set up GitHub Access token
 
 To be able to use this application and connect to GitHub from your localhost, you need to setup a GitHub access token using this url: https://github.com/settings/personal-access-tokens/new
 
 and make sure you grant this token access to the PR actions (important!)
 
-4. Set up OpenAI API key
+5. Set up OpenAI API key
 
 To be able to query OpenAI API, you need to have an account with https://platform.openai.com - this is the same account as for accessing the ChatGPT itself, but the billing is different.
 
@@ -52,7 +59,7 @@ If you want to change the model, there is a variable in `github_bot.py` named `M
 
 After you've logged in, go to https://platform.openai.com/api-keys to setup the API key and then provide it to this script as a parameter.
 
-5. Run the Script
+6. Run the Script
 
 The script takes the following positional parameters:
 
