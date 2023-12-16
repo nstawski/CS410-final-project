@@ -23,12 +23,13 @@ def generate_prompt(pr_diff):
         3. Ensure that the suggested code is valid Python code, matching the style and context of the original code in the diff. Make sure all comments are properly escaped.
         4. Crucial: Format your response as a Python list of tuples. Each tuple should be enclosed in round brackets and contain:
         - The file path as a string.
-        - The line number as an integer where the suggestion applies, correctly calculated for PyGithub using the diff hunk (should be the position in the diff).
+        - The line number as an integer where the suggestion applies, calculated for github using the diff hunk.
         - A detailed comment as a string, including a specific code snippet within backticks.
         - The corresponding diff hunk section as a string, accurately reflecting the location of the suggested change.
         The order of elements in the tuple is VERY important, please do not alter it.
 
-        Your response must start with '[' and end with ']', containing only the list of tuples. Each tuple element should be properly formatted for Python, with all brackets correctly closed. The diff hunk should match the location of your suggestion precisely.
+        Your response must start with '[' and end with ']', containing only the list of tuples. Each tuple element should be properly formatted for Python, with all brackets correctly closed. The diff hunk should match the location of your suggestion precisely. Each comment's location should match the place that the comment is being applied to.
+        The position is calculated using the diff. The comments should be made only on the changed portions of code (those that are denoted with "+" or "-" in the diff). Spelling errors etc. should not be checked for the lines with "-". Please make sure the comment position is calculated correctly using the diff hunks!
 
         Format your response like this example:
         [("file_path.py", 10, "Consider using list comprehension for efficiency: `[x for x in range(3)]`", "@@ -8,12 +8,15 @@"), ...]
@@ -91,7 +92,7 @@ def analyze_pr_diff(settings, pr_diff):
             print("Processing the response...")
             feedback = response.choices[0].message.content.strip() if response.choices else ''
             formatted_feedback = f'[{feedback.strip()}]' if feedback.strip().startswith("(") else feedback.strip()
-            cleaned_feedback = formatted_feedback.replace("\\\"", "\"")
+            cleaned_feedback = formatted_feedback.replace("\\\"", "\"").replace('\"', '"')
             print('Cleaned Feedback:', cleaned_feedback)
 
             # Evaluate the cleaned string as a Python object
