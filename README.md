@@ -18,6 +18,14 @@ source github_pr_bot_venv/bin/activate
 ```
 2. Install Dependencies
 
+Go into the `github_bot` folder 
+
+```
+cd github_bot
+```
+
+Now run:
+
 ```
 pip install -r requirements.txt
 ```
