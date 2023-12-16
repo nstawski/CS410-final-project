@@ -4,7 +4,7 @@ This is the final project for UIUC CS410 Text Information Systems class of Fall 
 
 This project is designed to be ran on localhost, but I might convert it to the webhook in the future.
 
-[Progress Report](https://github.com/nstawski/CS410-final-project/blob/main/Nina_Stawski_Final_Project_Progress_Report_updated.docx)
+[Progress Report](https://github.com/nstawski/CS410-final-project/blob/main/Nina_Stawski_Final_Project_Progress_Report_updated.pdf)
 
 [Final Project report](https://github.com/nstawski/CS410-final-project/blob/main/Nina_Stawski_Final_Project_Report.pdf)
 
